@@ -15,17 +15,6 @@ import {
   createDirectionsRequest,
 } from "../services/directions";
 
-const markers = [
-  {
-    lat: 50.4113731,
-    lng: 30.5993112,
-  },
-  {
-    lat: 50.4213731,
-    lng: 30.2993112,
-  },
-];
-
 const defaultCenter = {
   lat: 50.4113731,
   lng: 30.5993112,
@@ -115,6 +104,7 @@ export const PathMap = ({
         }
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, points]);
 
   if (loadError) return <span>"Load error"</span>;

@@ -1,6 +1,7 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, useMediaQuery } from "@mui/material";
 import { PathMap } from "./PathMap";
 import { LatLng } from "../types";
+import { useTheme } from "@mui/material";
 
 interface PathProps {
   title: string;
@@ -21,23 +22,49 @@ export const Path = ({
   onDelete,
   points,
 }: PathProps) => {
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down("md"));
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Box
         display="flex"
         justifyContent="space-between"
-        alignItems="center"
-        gap={0.3}
+        gap={1}
+        sx={{
+          flexDirection: {
+            xs: "column",
+            md: "row",
+          },
+        }}
       >
-        <Typography typography="h4">{title}</Typography>
+        <Typography
+          typography="h4"
+          sx={{
+            textAlign: {
+              xs: "center",
+              md: "start",
+            },
+          }}
+        >
+          {title}
+        </Typography>
         <Typography typography="h4" textAlign="center">
           {distance}
         </Typography>
       </Box>
-      <Typography typography="body2">{description}</Typography>
+      <Typography
+        typography="body2"
+        sx={{
+          textAlign: {
+            xs: "center",
+            md: "start",
+          },
+        }}
+      >
+        {description}
+      </Typography>
       <Box display="flex" flexDirection="column" gap={2}>
-        {/* <Box height={400} bgcolor="primary.main" /> */}
-
         <PathMap
           points={points}
           mapContainerStyles={{
@@ -48,13 +75,22 @@ export const Path = ({
         <Box
           display="flex"
           flexDirection="column"
-          gap={1}
           alignItems="flex-end"
+          sx={{
+            gap: {
+              xs: 2,
+              md: 1,
+            },
+          }}
         >
-          <Button onClick={onFavoriteToggle} variant="outlined">
+          <Button
+            onClick={onFavoriteToggle}
+            variant="outlined"
+            fullWidth={isMobile}
+          >
             {inFavorites ? "Remove from favorites" : "Add to favorites"}
           </Button>
-          <Button onClick={onDelete} variant="outlined">
+          <Button onClick={onDelete} variant="outlined" fullWidth={isMobile}>
             Remove
           </Button>
         </Box>

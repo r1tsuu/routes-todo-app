@@ -1,4 +1,5 @@
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
+import Close from "@mui/icons-material/Close";
 import { matchSorter } from "match-sorter";
 
 import {
@@ -11,6 +12,7 @@ import {
   DialogContent,
   Snackbar,
   Alert,
+  IconButton,
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { Layout } from "./components/Layout";
@@ -26,20 +28,20 @@ import {
   useUpdatePathMutation,
 } from "./services/pathsApi";
 import { CreatePathParams } from "./types";
-import { useDisclosure } from "./hooks/useDisclosure";
 import { useActionAlerts } from "./hooks/useActionAlerts";
+import { useDisclosure } from "./hooks/useDisclosure";
 
 export const App = () => {
   const [activePathId, setActivePathId] = useState<null | string>(null);
-  const [addPathDialogOpen, setAddPathDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const alerts = useActionAlerts();
+  const createPathDialog = useDisclosure();
+
   const { data: paths } = useFetchPathsQuery();
   const [createPath] = useCreatePathMutation();
   const [updatePath] = useUpdatePathMutation();
   const [deletePath] = useDeletePathMutation();
-
-  const alerts = useActionAlerts();
-
-  const [search, setSearch] = useState("");
 
   const filteredPaths = useMemo(
     () =>
@@ -78,12 +80,9 @@ export const App = () => {
     if (activePathId !== pathId) setActivePathId(pathId);
   };
 
-  const openAddPathDialog = () => setAddPathDialogOpen(true);
-  const closeAddPathDialog = () => setAddPathDialogOpen(false);
-
   const handleCreatePathSubmit = async (data: CreatePathParams) => {
     const res = await createPath(data);
-    closeAddPathDialog();
+    createPathDialog.onClose();
     alerts.openCreate();
 
     if ("data" in res && res.data) {
@@ -113,7 +112,7 @@ export const App = () => {
               sx={{
                 maxWidth: 180,
               }}
-              onClick={openAddPathDialog}
+              onClick={createPathDialog.onOpen}
             >
               Add path
             </Button>
@@ -155,11 +154,22 @@ export const App = () => {
         maxWidth="lg"
         fullWidth
         aria-labelledby="add-new-path"
-        onClose={closeAddPathDialog}
-        open={addPathDialogOpen}
+        onClose={createPathDialog.onClose}
+        open={createPathDialog.isOpen}
         color="grey.800"
       >
-        <DialogTitle>Add new path</DialogTitle>
+        <DialogTitle>
+          <Box
+            display="flex"
+            justifyContent={"space-between"}
+            alignItems="center"
+          >
+            <span>Add new path</span>
+            <IconButton onClick={createPathDialog.onClose}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
         <DialogContent dividers>
           <CreatePath onSubmit={handleCreatePathSubmit} />
         </DialogContent>

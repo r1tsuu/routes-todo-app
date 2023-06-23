@@ -30,6 +30,7 @@ export const PathCard = ({
       color={isActive ? "grey.100" : "grey.800"}
       borderRadius={2}
       onClick={onClick}
+      gap={0.5}
       sx={{ cursor: isActive ? "default" : "pointer" }}
     >
       <Box width="70%" display="flex" gap={1} alignItems="center">

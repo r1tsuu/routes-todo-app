@@ -1,4 +1,4 @@
-import { Container, Grid, Box } from "@mui/material";
+import { Container, Grid, Box, useTheme } from "@mui/material";
 
 interface LayoutProps {
   top: React.ReactNode;
@@ -7,6 +7,7 @@ interface LayoutProps {
 }
 
 export const Layout = ({ top, left, right }: LayoutProps) => {
+  const { breakpoints } = useTheme();
   return (
     <Container sx={{ paddingY: 3 }}>
       <Box
@@ -16,6 +17,22 @@ export const Layout = ({ top, left, right }: LayoutProps) => {
         borderBottom="1px solid"
         borderColor={"grey.500"}
         color={"grey.800"}
+        sx={{
+          gap: {
+            xs: 2,
+            md: 0,
+          },
+          flexDirection: {
+            xs: "column",
+            md: "row",
+          },
+          [breakpoints.down("md")]: {
+            button: {
+              width: "100%",
+              maxWidth: "unset",
+            },
+          },
+        }}
       >
         {top}
       </Box>
@@ -55,6 +72,7 @@ export const Layout = ({ top, left, right }: LayoutProps) => {
           maxHeight={600}
           overflow={"auto"}
           paddingRight={4}
+          className="scroll"
           item
           xs={12}
           lg={6}
