@@ -1,7 +1,7 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IPath } from "../types";
 
 import { firestore } from "../app/firebase";
+import { IPath } from "../types";
 
 import {
   updateDoc,

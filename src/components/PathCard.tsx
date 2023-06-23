@@ -1,8 +1,7 @@
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import StarIcon from "@mui/icons-material/Star";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-
-import { Grid, Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 interface PathCardProps {
   title: string;

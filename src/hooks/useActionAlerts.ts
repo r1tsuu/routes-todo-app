@@ -14,7 +14,7 @@ export const useActionAlerts = () => {
   return {
     openCreate: createPathAlert.onOpen,
     openUpdate: updatePathAlert.onOpen,
-    opneDelete: deletePathAlert.onOpen,
+    openDelete: deletePathAlert.onOpen,
     list: [
       item(createPathAlert, "Path has been successfully added"),
       item(deletePathAlert, "Path has been successfully deleted"),

@@ -1,7 +1,7 @@
+import { useMemo, useState } from "react";
+import { matchSorter } from "match-sorter";
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import Close from "@mui/icons-material/Close";
-import { matchSorter } from "match-sorter";
-
 import {
   Box,
   Button,
@@ -14,22 +14,24 @@ import {
   Alert,
   IconButton,
 } from "@mui/material";
-import { useMemo, useState } from "react";
-import { Layout } from "./components/Layout";
 
+import { Layout } from "./components/Layout";
 import { SearchField } from "./components/SearchField";
 import { PathCard } from "./components/PathCard";
 import { Path } from "./components/Path";
 import { CreatePath } from "./components/CreatePath";
+
 import {
   useCreatePathMutation,
   useDeletePathMutation,
   useFetchPathsQuery,
   useUpdatePathMutation,
 } from "./services/pathsApi";
-import { CreatePathParams } from "./types";
+
 import { useActionAlerts } from "./hooks/useActionAlerts";
 import { useDisclosure } from "./hooks/useDisclosure";
+
+import { CreatePathParams } from "./types";
 
 export const App = () => {
   const [activePathId, setActivePathId] = useState<null | string>(null);
@@ -69,7 +71,7 @@ export const App = () => {
         },
         onDelete: async () => {
           await deletePath(id);
-          alerts.opneDelete();
+          alerts.openDelete();
         },
       };
     }

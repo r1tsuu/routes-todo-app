@@ -1,7 +1,13 @@
-import { Box, Typography, Button, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+
 import { PathMap } from "./PathMap";
 import { LatLng } from "../types";
-import { useTheme } from "@mui/material";
 
 interface PathProps {
   title: string;

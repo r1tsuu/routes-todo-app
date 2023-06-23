@@ -1,19 +1,22 @@
+import { useEffect, useRef, useState } from "react";
 import {
   DirectionsRenderer,
   GoogleMap,
   Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
-import { useEffect, useRef, useState } from "react";
+
 import AddLocationIcon from "@mui/icons-material/AddLocation";
 import { Box } from "@mui/system";
 import { Button } from "@mui/material";
-import { LatLng } from "../types";
+
 import { mapStyles, GOOGLE_MAP_API_KEY } from "../app/googleMap";
 import {
   calculateDistanceBySteps,
   createDirectionsRequest,
 } from "../services/directions";
+
+import { LatLng } from "../types";
 
 const defaultCenter = {
   lat: 50.4113731,

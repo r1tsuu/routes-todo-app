@@ -1,5 +1,8 @@
+import { useState } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, useForm } from "react-hook-form";
+
 import {
   Alert,
   Box,
@@ -7,18 +10,16 @@ import {
   Grid,
   Snackbar,
   TextField,
-  TextareaAutosize,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
-import { PathMap } from "./PathMap";
-import { CreatePathParams, LatLng } from "../types";
-import { distanceToString } from "../services/directions";
-import { Controller, useForm } from "react-hook-form";
 
+import { PathMap } from "./PathMap";
+import { distanceToString } from "../services/directions";
 import { useDisclosure } from "../hooks/useDisclosure";
+
+import { CreatePathParams, LatLng } from "../types";
 
 const Field = ({
   children,
