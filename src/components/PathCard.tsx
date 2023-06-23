@@ -62,7 +62,7 @@ export const PathCard = ({
         justifyContent="space-between"
         alignItems="center"
       >
-        <Typography typography="h5">{distance}</Typography>
+        <Typography typography="h6">{distance}</Typography>
         <ArrowForwardIosIcon />
       </Box>
     </Box>
