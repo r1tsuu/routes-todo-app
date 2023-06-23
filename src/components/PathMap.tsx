@@ -5,8 +5,14 @@ import {
   Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import AddLocationIcon from "@mui/icons-material/AddLocation";
 import { GOOGLE_MAP_API_KEY } from "../constants";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Box } from "@mui/system";
+import { Button } from "@mui/material";
+import { LatLng } from "../types";
+import { mapStyles } from "../constants/mapStyles";
+import { calculateDistance, directionsRequest } from "../services/directions";
 
 const markers = [
   {
@@ -27,86 +33,139 @@ const w1 = {
   lng: 30.3993112,
 };
 
-const center = {
+const defaultCenter = {
   lat: 50.4113731,
   lng: 30.5993112,
 };
 
 interface PathMapProps {
-  points: google.maps.LatLng[];
-  onChange: (params: {
-    markers: google.maps.LatLng[];
-    distance: number;
-  }) => void;
+  points?: LatLng[];
+  onChange?: (params: { points: LatLng[]; distance: number | null }) => void;
 }
 
-export const PathMap = ({ points }: PathMapProps) => {
+export const PathMap = ({
+  points: defaultPoints = [],
+  onChange,
+}: PathMapProps) => {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAP_API_KEY,
   });
   const [directionsResult, setDirectionsResult] =
     useState<null | google.maps.DirectionsResult>(null);
-  const directionLoading = useRef<boolean>(false);
+  const directionsService = useRef<google.maps.DirectionsService | null>(null);
 
-  // const [points, setPoints] = useState<google.maps.LatLng[]>([]);
+  const [clickedToAdd, setClickedToAdd] = useState(false);
+  const [mapCenter, setMapCenter] = useState(() =>
+    defaultPoints[0]
+      ? {
+          lat: points[0].lat,
+          lng: points[0].lng,
+        }
+      : defaultCenter
+  );
 
-  const directionsCallback = (
-    result: google.maps.DirectionsResult | null,
-    status: google.maps.DirectionsStatus
-  ) => {
-    // return console.log(result);
-    if (result !== null && status === "OK") setDirectionsResult(result);
-    else console.log("DirectionsResult Error ", result);
+  const [map, setMap] = useState<null | google.maps.Map>(null);
+  const [points, setPoints] = useState<LatLng[]>(defaultPoints);
+
+  const updateCenter = () => {
+    const mapCenter = map?.getCenter()?.toJSON();
+    if (mapCenter) setMapCenter(mapCenter);
   };
 
-  const onLoad = (map: google.maps.Map) => {
-    const directionsService = new google.maps.DirectionsService();
-    directionLoading.current = true;
-    directionsService.route(
-      {
-        origin: m1,
-        destination: m2,
-        travelMode: google.maps.TravelMode.DRIVING,
-        waypoints: [
-          {
-            location: w1,
-          },
-        ],
-      },
-      (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK)
-          setDirectionsResult(result);
-      }
-    );
+  console.log(mapCenter);
+
+  const createDragHandler =
+    (pointIndex: number) => (e: google.maps.MapMouseEvent) => {
+      setPoints((prevPoints) =>
+        prevPoints.map((point, index) =>
+          pointIndex === index && e.latLng ? e.latLng.toJSON() : point
+        )
+      );
+    };
+
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (clickedToAdd) {
+      setPoints((prev) => (e.latLng ? [...prev, e.latLng.toJSON()] : prev));
+      setClickedToAdd(false);
+      updateCenter();
+    }
   };
 
-  console.log(directionsResult);
+  const handleAddButtonClick = () => {
+    setClickedToAdd(true);
+    updateCenter();
+  };
+
+  useEffect(() => {
+    if (window.google && isLoaded && points.length > 1) {
+      if (directionsService.current === null)
+        directionsService.current = new google.maps.DirectionsService();
+
+      directionsService.current.route(
+        directionsRequest(points),
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK && result !== null) {
+            setDirectionsResult(result);
+            if (typeof onChange === "function")
+              onChange({
+                points,
+                distance: calculateDistance(result),
+              });
+          }
+        }
+      );
+    }
+  }, [isLoaded, points]);
 
   if (loadError) return <span>"Load error"</span>;
 
   return isLoaded ? (
-    <GoogleMap
-      center={center}
-      zoom={10}
-      onLoad={onLoad}
-      mapContainerStyle={{
-        height: "600px",
-        width: "100%",
-      }}
-    >
-      <Marker position={m1} title="1" draggable>
-        1
-      </Marker>
-      <Marker position={m2} title="2" draggable />
-      {directionsResult && (
-        <DirectionsRenderer
-          options={{
-            directions: directionsResult,
-            suppressMarkers: true,
-          }}
-        />
-      )}
-    </GoogleMap>
+    <Box position="relative">
+      <GoogleMap
+        center={mapCenter}
+        zoom={10}
+        onLoad={setMap}
+        onClick={handleMapClick}
+        options={{
+          styles: mapStyles,
+        }}
+        mapContainerStyle={{
+          height: "600px",
+          width: "100%",
+        }}
+      >
+        {points.map((point, index) => (
+          <Marker
+            position={point}
+            draggable
+            onDragEnd={createDragHandler(index)}
+          />
+        ))}
+        {directionsResult && (
+          <DirectionsRenderer
+            options={{
+              directions: directionsResult,
+              suppressMarkers: true,
+            }}
+          />
+        )}
+      </GoogleMap>
+      <Button
+        variant="contained"
+        fullWidth
+        startIcon={<AddLocationIcon />}
+        onClick={handleAddButtonClick}
+        sx={{
+          position: "absolute",
+          top: "30px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          maxWidth: 300,
+        }}
+      >
+        {clickedToAdd ? "Click on the map" : "Add marker"}
+      </Button>
+    </Box>
   ) : (
     <span>"Loading"</span>
   );

@@ -10,6 +10,8 @@ import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { useCallback, useState } from "react";
 import { GOOGLE_MAP_API_KEY } from "../constants";
 import { PathMap } from "./PathMap";
+import { LatLng } from "../types";
+import { distanceToString } from "../services/directions";
 
 const Field = ({
   element,
@@ -43,35 +45,13 @@ const center = {
 };
 
 export const AddPath = () => {
-  // const { loadError, isLoaded } = useJsApiLoader({
-  //   googleMapsApiKey: GOOGLE_MAP_API_KEY,
-  // });
-
-  // const [map, setMap] = useState<null | google.maps.Map>(null);
-
-  // const renderMap = () => {
-  //   const onLoad = (map: google.maps.Map) => {
-  //     setMap(map);
-  //   };
-
-  //   return (
-  //     <GoogleMap
-  //       mapContainerStyle={{
-  //         height: "600px",
-  //         width: "100%",
-  //       }}
-  //       zoom={10}
-  //       center={center}
-  //       onLoad={onLoad}
-  //     >
-  //       {markers.map((pos, index) => (
-  //         <Marker key={index} position={pos} />
-  //       ))}
-  //     </GoogleMap>
-  //   );
-  // };
-
-  // const onUnmount = useCallback(() => setMap(null), []);
+  const [pathMapData, setPathMapData] = useState<{
+    points: LatLng[];
+    distance: number | null;
+  }>({
+    points: [],
+    distance: null,
+  });
 
   return (
     <Grid container spacing={3}>
@@ -88,14 +68,16 @@ export const AddPath = () => {
           />
         </Box>
         <Box display="flex" flexDirection="column" gap={6} alignItems="center">
-          <Typography typography="h4">Length 1.13 km</Typography>
+          <Typography typography="h4">
+            Length {distanceToString(pathMapData.distance || 0)}
+          </Typography>
           <Button size="large" variant="contained">
             Add Path
           </Button>
         </Box>
       </Grid>
       <Grid item xs={6}>
-        <PathMap />
+        <PathMap points={pathMapData?.points} onChange={setPathMapData} />
       </Grid>
     </Grid>
   );
