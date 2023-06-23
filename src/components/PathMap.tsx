@@ -118,6 +118,8 @@ export const PathMap = ({
         onClick={handleMapClick}
         options={{
           styles: mapStyles,
+          mapTypeControl: false,
+          panControl: false,
         }}
         mapContainerStyle={mapContainerStyles}
       >
