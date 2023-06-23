@@ -1,110 +1,99 @@
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
+import { matchSorter } from "match-sorter";
 
-import { Box, Button, CssBaseline, Typography, Dialog, DialogTitle, DialogContent } from "@mui/material";
+import {
+  Box,
+  Button,
+  CssBaseline,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { useMemo, useState } from "react";
 import { Layout } from "./components/Layout";
-import { Combobox } from "./components/Combobox";
+
+import { SearchField } from "./components/SearchField";
 import { PathCard } from "./components/PathCard";
 import { Path } from "./components/Path";
 import { CreatePath } from "./components/CreatePath";
-import { useJsApiLoader } from "@react-google-maps/api";
-import { GOOGLE_MAP_API_KEY } from "./constants";
-
-const paths = [
-  {
-    id: 0,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-  {
-    id: 1,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-  {
-    id: 2,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-  {
-    id: 3,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-  {
-    id: 4,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-  {
-    id: 5,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-  {
-    id: 6,
-    title: "Path title",
-    shortDescription:
-      "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
-    distance: "1.75 km",
-    isFavorited: true,
-  },
-];
+import {
+  useCreatePathMutation,
+  useDeletePathMutation,
+  useFetchPathsQuery,
+  useUpdatePathMutation,
+} from "./services/pathsApi";
+import { CreatePathParams } from "./types";
+import { useDisclosure } from "./hooks/useDisclosure";
+import { useActionAlerts } from "./hooks/useActionAlerts";
 
 export const App = () => {
-  const [activePathId, setActivePathId] = useState<null | number>(null);
+  const [activePathId, setActivePathId] = useState<null | string>(null);
   const [addPathDialogOpen, setAddPathDialogOpen] = useState(false);
+  const { data: paths } = useFetchPathsQuery();
+  const [createPath] = useCreatePathMutation();
+  const [updatePath] = useUpdatePathMutation();
+  const [deletePath] = useDeletePathMutation();
 
-  const activePath = useMemo(() => paths.find((route) => route.id === activePathId), [activePathId]);
+  const alerts = useActionAlerts();
 
-  const createPathCardClickHandler = (pathId: number) => () => {
+  const [search, setSearch] = useState("");
+
+  const filteredPaths = useMemo(
+    () =>
+      paths && search
+        ? matchSorter(paths, search, { keys: ["title", "description"] })
+        : paths,
+    [search, paths]
+  );
+
+  const activePath = useMemo(() => {
+    if (paths && activePathId) {
+      const path = paths.find((route) => route.id === activePathId);
+      if (!path) return null;
+      const { id, inFavorites, ...rest } = path;
+      return {
+        id,
+        inFavorites,
+        ...rest,
+        onFavoriteToggle: async () => {
+          await updatePath({
+            id,
+            inFavorites: !inFavorites,
+          });
+          alerts.openUpdate();
+        },
+        onDelete: async () => {
+          await deletePath(id);
+          alerts.opneDelete();
+        },
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePathId, paths]);
+
+  const createClickPathHandler = (pathId: string) => () => {
     if (activePathId !== pathId) setActivePathId(pathId);
   };
 
   const openAddPathDialog = () => setAddPathDialogOpen(true);
   const closeAddPathDialog = () => setAddPathDialogOpen(false);
 
+  const handleCreatePathSubmit = async (data: CreatePathParams) => {
+    const res = await createPath(data);
+    closeAddPathDialog();
+    alerts.openCreate();
+
+    if ("data" in res && res.data) {
+      setActivePathId(res.data);
+    }
+  };
+
   return (
     <>
       <CssBaseline />
-      <Dialog
-        maxWidth="lg"
-        fullWidth
-        aria-labelledby="add-new-path"
-        onClose={closeAddPathDialog}
-        open={addPathDialogOpen}
-        color="grey.800"
-      >
-        <DialogTitle>Add new path</DialogTitle>
-        <DialogContent dividers>
-          <CreatePath />
-        </DialogContent>
-      </Dialog>
       <Layout
         top={
           <>
@@ -132,16 +121,64 @@ export const App = () => {
         }
         left={
           <>
-            <Combobox options={paths} />
-            <Box marginTop={2} maxHeight={500} overflow="auto" display="flex" flexDirection="column" gap={1.5}>
-              {paths.map(({ id, ...route }) => (
-                <PathCard isActive={id === activePathId} onClick={createPathCardClickHandler(id)} {...route} key={id} />
-              ))}
+            <SearchField value={search} onChange={setSearch} />
+            <Box
+              marginTop={2}
+              overflow="auto"
+              display="flex"
+              flexDirection="column"
+              gap={1.5}
+              paddingRight={2}
+              sx={{
+                maxHeight: {
+                  xs: "50vh",
+                  lg: "530px",
+                },
+              }}
+            >
+              {filteredPaths
+                ? filteredPaths.map(({ id, ...data }) => (
+                    <PathCard
+                      isActive={id === activePathId}
+                      onClick={createClickPathHandler(id)}
+                      key={id}
+                      {...data}
+                    />
+                  ))
+                : "Loading"}
             </Box>
           </>
         }
         right={activePath && <Path {...activePath} />}
       />
+      <Dialog
+        maxWidth="lg"
+        fullWidth
+        aria-labelledby="add-new-path"
+        onClose={closeAddPathDialog}
+        open={addPathDialogOpen}
+        color="grey.800"
+      >
+        <DialogTitle>Add new path</DialogTitle>
+        <DialogContent dividers>
+          <CreatePath onSubmit={handleCreatePathSubmit} />
+        </DialogContent>
+      </Dialog>
+      {alerts.list.map(({ title, ...props }, index) => (
+        <Snackbar
+          key={index}
+          autoHideDuration={2500}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          {...props}
+        >
+          <Alert severity="success" {...props}>
+            {title}
+          </Alert>
+        </Snackbar>
+      ))}
     </>
   );
 };

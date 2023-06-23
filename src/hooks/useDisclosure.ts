@@ -4,7 +4,16 @@ interface UseDisclosureParams {
   defaultIsOpen?: boolean;
 }
 
-export const useDisclosure = ({ defaultIsOpen = false }: UseDisclosureParams = {}) => {
+export interface DisclosureReturn {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onToggle: () => void;
+}
+
+export const useDisclosure = ({
+  defaultIsOpen = false,
+}: UseDisclosureParams = {}): DisclosureReturn => {
   const [isOpen, setIsOpen] = useState(defaultIsOpen);
 
   const onOpen = () => setIsOpen(true);

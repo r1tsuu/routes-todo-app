@@ -1,12 +1,19 @@
-import { DirectionsRenderer, DirectionsService, GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import AddLocationIcon from "@mui/icons-material/AddLocation";
-import { GOOGLE_MAP_API_KEY } from "../constants";
+import {
+  DirectionsRenderer,
+  GoogleMap,
+  Marker,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
+import AddLocationIcon from "@mui/icons-material/AddLocation";
 import { Box } from "@mui/system";
 import { Button } from "@mui/material";
 import { LatLng } from "../types";
-import { mapStyles } from "../constants/mapStyles";
-import { calculateDistanceBySteps, directionsRequest } from "../services/directions";
+import { mapStyles, GOOGLE_MAP_API_KEY } from "../app/googleMap";
+import {
+  calculateDistanceBySteps,
+  createDirectionsRequest,
+} from "../services/directions";
 
 const markers = [
   {
@@ -19,14 +26,6 @@ const markers = [
   },
 ];
 
-const m1 = markers[0];
-const m2 = markers[1];
-
-const w1 = {
-  lat: 50.0413731,
-  lng: 30.3993112,
-};
-
 const defaultCenter = {
   lat: 50.4113731,
   lng: 30.5993112,
@@ -35,21 +34,29 @@ const defaultCenter = {
 interface PathMapProps {
   points?: LatLng[];
   onChange?: (params: { points: LatLng[]; distance: number | null }) => void;
+  editable?: boolean;
+  mapContainerStyles?: React.CSSProperties;
 }
 
-export const PathMap = ({ points: defaultPoints = [], onChange }: PathMapProps) => {
+export const PathMap = ({
+  points: defaultPoints = [],
+  onChange,
+  editable,
+  mapContainerStyles,
+}: PathMapProps) => {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAP_API_KEY,
   });
-  const [directionsResult, setDirectionsResult] = useState<null | google.maps.DirectionsResult>(null);
+  const [directionsResult, setDirectionsResult] =
+    useState<null | google.maps.DirectionsResult>(null);
   const directionsService = useRef<google.maps.DirectionsService | null>(null);
 
   const [clickedToAdd, setClickedToAdd] = useState(false);
   const [mapCenter, setMapCenter] = useState(() =>
     defaultPoints[0]
       ? {
-          lat: points[0].lat,
-          lng: points[0].lng,
+          lat: defaultPoints[0].lat,
+          lng: defaultPoints[0].lng,
         }
       : defaultCenter
   );
@@ -57,18 +64,20 @@ export const PathMap = ({ points: defaultPoints = [], onChange }: PathMapProps) 
   const [map, setMap] = useState<null | google.maps.Map>(null);
   const [points, setPoints] = useState<LatLng[]>(defaultPoints);
 
-  const updateCenter = () => {
+  const updateCenter = (center?: google.maps.LatLngLiteral) => {
+    if (center) return setMapCenter(center);
     const mapCenter = map?.getCenter()?.toJSON();
     if (mapCenter) setMapCenter(mapCenter);
   };
 
-  console.log(mapCenter);
-
-  const createDragHandler = (pointIndex: number) => (e: google.maps.MapMouseEvent) => {
-    setPoints((prevPoints) =>
-      prevPoints.map((point, index) => (pointIndex === index && e.latLng ? e.latLng.toJSON() : point))
-    );
-  };
+  const createDragHandler =
+    (pointIndex: number) => (e: google.maps.MapMouseEvent) => {
+      setPoints((prevPoints) =>
+        prevPoints.map((point, index) =>
+          pointIndex === index && e.latLng ? e.latLng.toJSON() : point
+        )
+      );
+    };
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     if (clickedToAdd) {
@@ -84,19 +93,27 @@ export const PathMap = ({ points: defaultPoints = [], onChange }: PathMapProps) 
   };
 
   useEffect(() => {
-    if (window.google && isLoaded && points.length > 1) {
-      if (directionsService.current === null) directionsService.current = new google.maps.DirectionsService();
+    setPoints(defaultPoints);
+  }, [defaultPoints]);
 
-      directionsService.current.route(directionsRequest(points), (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK && result !== null) {
-          setDirectionsResult(result);
-          if (typeof onChange === "function")
-            onChange({
-              points,
-              distance: calculateDistanceBySteps(result.routes[0].legs),
-            });
+  useEffect(() => {
+    if (window.google && isLoaded && points.length > 1) {
+      if (directionsService.current === null)
+        directionsService.current = new google.maps.DirectionsService();
+
+      directionsService.current.route(
+        createDirectionsRequest(points),
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK && result !== null) {
+            setDirectionsResult(result);
+            if (typeof onChange === "function")
+              onChange({
+                points,
+                distance: calculateDistanceBySteps(result.routes[0].legs),
+              });
+          }
         }
-      });
+      );
     }
   }, [isLoaded, points]);
 
@@ -112,38 +129,48 @@ export const PathMap = ({ points: defaultPoints = [], onChange }: PathMapProps) 
         options={{
           styles: mapStyles,
         }}
-        mapContainerStyle={{
-          height: "600px",
-          width: "100%",
-        }}
+        mapContainerStyle={mapContainerStyles}
       >
         {points.map((point, index) => (
-          <Marker position={point} draggable onDragEnd={createDragHandler(index)} />
+          <Marker
+            position={point}
+            label={(index + 1).toString()}
+            {...(editable && {
+              onDragEnd: createDragHandler(index),
+              draggable: true,
+            })}
+          />
         ))}
         {directionsResult && (
           <DirectionsRenderer
             options={{
               directions: directionsResult,
               suppressMarkers: true,
+              polylineOptions: {
+                strokeColor: "white",
+                strokeWeight: 2,
+              },
             }}
           />
         )}
       </GoogleMap>
-      <Button
-        variant="contained"
-        fullWidth
-        startIcon={<AddLocationIcon />}
-        onClick={handleAddButtonClick}
-        sx={{
-          position: "absolute",
-          top: "30px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          maxWidth: 300,
-        }}
-      >
-        {clickedToAdd ? "Click on the map" : "Add marker"}
-      </Button>
+      {editable && (
+        <Button
+          variant="contained"
+          fullWidth
+          startIcon={<AddLocationIcon />}
+          onClick={handleAddButtonClick}
+          sx={{
+            position: "absolute",
+            top: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            maxWidth: 300,
+          }}
+        >
+          {clickedToAdd ? "Click on the map" : "Add marker"}
+        </Button>
+      )}
     </Box>
   ) : (
     <span>"Loading"</span>

@@ -8,7 +8,7 @@ interface LayoutProps {
 
 export const Layout = ({ top, left, right }: LayoutProps) => {
   return (
-    <Container>
+    <Container sx={{ paddingY: 3 }}>
       <Box
         display={"flex"}
         justifyContent="space-between"
@@ -19,11 +19,46 @@ export const Layout = ({ top, left, right }: LayoutProps) => {
       >
         {top}
       </Box>
-      <Grid paddingTop={3} container spacing={4}>
-        <Grid item xs={6}>
+      <Grid
+        paddingTop={3}
+        container
+        sx={{
+          gap: {
+            xs: 4,
+            lg: 0,
+          },
+        }}
+      >
+        <Grid
+          item
+          xs={12}
+          lg={6}
+          sx={{
+            paddingRight: {
+              lg: 4,
+            },
+            borderWidth: "1px",
+            borderColor: "grey.500",
+            borderRightStyle: {
+              lg: "solid",
+            },
+          }}
+        >
           {left}
         </Grid>
-        <Grid item xs={6}>
+        <Grid
+          sx={{
+            paddingLeft: {
+              lg: 4,
+            },
+          }}
+          maxHeight={600}
+          overflow={"auto"}
+          paddingRight={4}
+          item
+          xs={12}
+          lg={6}
+        >
           {right}
         </Grid>
       </Grid>

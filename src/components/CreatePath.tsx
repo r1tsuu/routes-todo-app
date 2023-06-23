@@ -7,19 +7,26 @@ import {
   Grid,
   Snackbar,
   TextField,
-  TextFieldProps,
   TextareaAutosize,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { PathMap } from "./PathMap";
-import { LatLng } from "../types";
+import { CreatePathParams, LatLng } from "../types";
 import { distanceToString } from "../services/directions";
 import { Controller, useForm } from "react-hook-form";
-import { i18n } from "../constants/i18n";
+
 import { useDisclosure } from "../hooks/useDisclosure";
 
-const Field = ({ children, label }: { children: React.ReactNode; label: string }) => {
+const Field = ({
+  children,
+  label,
+}: {
+  children: React.ReactNode;
+  label: string;
+}) => {
   return (
     <Box display="flex" flexDirection="column">
       <Typography typography="body1">{label}</Typography>
@@ -28,10 +35,15 @@ const Field = ({ children, label }: { children: React.ReactNode; label: string }
   );
 };
 
+const requiredMsg = "The field is required";
+
 const createPathFormSchema = yup.object().shape({
-  title: yup.string().required(i18n.required),
-  shortDescription: yup.string().required(i18n.required).max(160),
-  description: yup.string().required(i18n.required),
+  title: yup.string().required(requiredMsg),
+  shortDescription: yup
+    .string()
+    .required(requiredMsg)
+    .max(160, "Max length of the field is 160 symbols"),
+  description: yup.string().required(requiredMsg),
 });
 
 interface CreatePathFormFields {
@@ -41,12 +53,7 @@ interface CreatePathFormFields {
 }
 
 interface CreatePathProps {
-  onSubmit: (
-    params: {
-      points: LatLng[];
-      distance: number;
-    } & CreatePathFormFields
-  ) => void;
+  onSubmit: (params: CreatePathParams) => void;
 }
 
 export const CreatePath = ({ onSubmit }: CreatePathProps) => {
@@ -57,6 +64,9 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
     points: [],
     distance: null,
   });
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const {
     isOpen: isPointsLengthAlertOpen,
@@ -75,7 +85,7 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
       onSubmit({
         ...data,
         points,
-        distance,
+        distance: distanceToString(distance),
       });
     else onPointsLengthAlertOpen();
   };
@@ -83,37 +93,55 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
   const textFields = [
     {
       name: "title",
+      label: "Title",
     },
     {
       name: "shortDescription",
+      label: "Short description",
       props: {
-        minRows: 3,
+        rows: 2,
+        multiline: true,
       },
     },
     {
       name: "description",
+      label: "Description",
       props: {
-        minRows: 5,
-        InputProps: {
-          inputComponent: TextareaAutosize,
-        },
+        multiline: true,
+        minRows: 4,
       },
     },
   ];
 
   return (
     <>
-      <Grid container spacing={3} component="form" onSubmit={handleSubmit(submit)}>
-        <Grid item xs={6} display="flex" flexDirection="column" gap={6}>
+      <Grid container spacing={3}>
+        <Grid
+          item
+          xs={12}
+          lg={6}
+          display="flex"
+          flexDirection="column"
+          gap={6}
+          sx={{
+            gap: {
+              xs: 3,
+              lg: 6,
+            },
+          }}
+          component="form"
+          onSubmit={handleSubmit(submit)}
+        >
           <Box display="flex" flexDirection="column" gap={2}>
-            {textFields.map(({ name, props = {} }) => (
+            {textFields.map(({ name, label, props = {} }) => (
               <Controller
                 key={name}
                 name={name as "title" | "shortDescription" | "description"}
                 control={control}
                 render={({ field, fieldState }) => (
-                  <Field label={i18n.title}>
+                  <Field label={label}>
                     <TextField
+                      variant="outlined"
                       {...field}
                       helperText={fieldState.error?.message}
                       error={!!fieldState.error?.message}
@@ -124,15 +152,41 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
               />
             ))}
           </Box>
-          <Box display="flex" flexDirection="column" gap={6} alignItems="center">
-            <Typography typography="h4">Length {distanceToString(distance)}</Typography>
-            <Button size="large" variant="contained" type="submit">
-              {i18n.addPath}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            sx={{
+              gap: {
+                xs: 3,
+              },
+            }}
+          >
+            {distance && (
+              <Typography typography="h4">
+                Length {distanceToString(distance)}
+              </Typography>
+            )}
+            <Button
+              size="large"
+              variant="contained"
+              type="submit"
+              fullWidth={isMobile}
+            >
+              Add path
             </Button>
           </Box>
         </Grid>
-        <Grid item xs={6}>
-          <PathMap points={points} onChange={setPathMapData} />
+        <Grid item xs={12} lg={6}>
+          <PathMap
+            mapContainerStyles={{
+              width: "100%",
+              height: isMobile ? 400 : 580,
+            }}
+            editable
+            points={points}
+            onChange={setPathMapData}
+          />
         </Grid>
       </Grid>
       <Snackbar
@@ -141,7 +195,9 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
         autoHideDuration={3000}
         onClose={onPointsLengthAlertClose}
       >
-        <Alert onClose={onPointsLengthAlertClose}>Create at least 2 points</Alert>
+        <Alert severity="warning" onClose={onPointsLengthAlertClose}>
+          Create at least 2 points
+        </Alert>
       </Snackbar>
     </>
   );

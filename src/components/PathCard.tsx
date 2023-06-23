@@ -8,7 +8,7 @@ interface PathCardProps {
   title: string;
   shortDescription: string;
   distance: string;
-  isFavorited: boolean;
+  inFavorites?: boolean;
   isActive: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
@@ -17,14 +17,13 @@ export const PathCard = ({
   title,
   shortDescription,
   distance,
-  isFavorited,
+  inFavorites,
   isActive,
   onClick,
 }: PathCardProps) => {
   return (
-    <Grid
+    <Box
       bgcolor={isActive ? "primary.light" : "grey.200"}
-      container
       display="flex"
       alignItems="center"
       padding={1}
@@ -33,7 +32,7 @@ export const PathCard = ({
       onClick={onClick}
       sx={{ cursor: isActive ? "default" : "pointer" }}
     >
-      <Grid item xs={10} display="flex" gap={1} alignItems="center">
+      <Box width="70%" display="flex" gap={1} alignItems="center">
         <ZoomOutMapIcon
           sx={{
             fontSize: 36,
@@ -41,7 +40,7 @@ export const PathCard = ({
         />
         <Box>
           <Box display="flex" gap={0.2} alignItems="center">
-            {isFavorited && (
+            {inFavorites && (
               <StarIcon
                 sx={{
                   color: isActive ? "secondary.light" : "primary.light",
@@ -49,17 +48,22 @@ export const PathCard = ({
                 color="inherit"
               />
             )}
-            <Typography typography="subtitle2">{title}</Typography>
+            <Typography typography="h6">{title}</Typography>
           </Box>
           <Typography fontSize={14} typography="body2">
             {shortDescription}
           </Typography>
         </Box>
-      </Grid>
-      <Grid item xs={2} display="flex" justifyContent="space-between">
-        <Typography typography="subtitle1">{distance}</Typography>
+      </Box>
+      <Box
+        width="30%"
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography typography="h5">{distance}</Typography>
         <ArrowForwardIosIcon />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 };

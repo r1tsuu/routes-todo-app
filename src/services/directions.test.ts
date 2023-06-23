@@ -1,4 +1,8 @@
-import { calculateDistanceBySteps, directionsRequest, distanceToString } from "./directions";
+import {
+  calculateDistanceBySteps,
+  createDirectionsRequest,
+  distanceToString,
+} from "./directions";
 
 const setupGoogleMock = () => {
   global.window.google = {
@@ -74,11 +78,13 @@ test("calculateDistanceBySteps", () => {
   ).toBe(800);
 });
 
-test("directionsRequest", () => {
+test("createDirectionsRequest", () => {
   // Points length errors
-  expect(() => directionsRequest([])).toThrow("directionsRequest needs at least 2 points, current=0");
+  expect(() => createDirectionsRequest([])).toThrow(
+    "directionsRequest needs at least 2 points, current=0"
+  );
   expect(() =>
-    directionsRequest([
+    createDirectionsRequest([
       {
         lat: 40,
         lng: 10,
@@ -90,7 +96,7 @@ test("directionsRequest", () => {
   const destination = getRandomLatLng();
 
   // 2 Points origin and destination
-  expect(directionsRequest([origin, destination])).toMatchObject({
+  expect(createDirectionsRequest([origin, destination])).toMatchObject({
     origin,
     destination,
     travelMode: google.maps.TravelMode.DRIVING,
@@ -99,7 +105,9 @@ test("directionsRequest", () => {
   const pointThrough_1 = getRandomLatLng();
 
   // 3 Points and more (points through first element - origin and last element - destination)
-  expect(directionsRequest([origin, pointThrough_1, destination])).toMatchObject({
+  expect(
+    createDirectionsRequest([origin, pointThrough_1, destination])
+  ).toMatchObject({
     origin,
     destination,
     travelMode: google.maps.TravelMode.DRIVING,
@@ -112,7 +120,14 @@ test("directionsRequest", () => {
 
   const pointThrough_2 = getRandomLatLng();
 
-  expect(directionsRequest([origin, pointThrough_1, pointThrough_2, destination])).toMatchObject({
+  expect(
+    createDirectionsRequest([
+      origin,
+      pointThrough_1,
+      pointThrough_2,
+      destination,
+    ])
+  ).toMatchObject({
     origin,
     destination,
     travelMode: google.maps.TravelMode.DRIVING,
@@ -127,7 +142,12 @@ test("directionsRequest", () => {
   });
 
   // Travel mode
-  expect(directionsRequest([origin, destination], google.maps.TravelMode.BICYCLING)).toMatchObject({
+  expect(
+    createDirectionsRequest(
+      [origin, destination],
+      google.maps.TravelMode.BICYCLING
+    )
+  ).toMatchObject({
     origin,
     destination,
     travelMode: google.maps.TravelMode.BICYCLING,
