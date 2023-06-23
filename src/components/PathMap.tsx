@@ -1,10 +1,4 @@
-import {
-  DirectionsRenderer,
-  DirectionsService,
-  GoogleMap,
-  Marker,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import { DirectionsRenderer, DirectionsService, GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import AddLocationIcon from "@mui/icons-material/AddLocation";
 import { GOOGLE_MAP_API_KEY } from "../constants";
 import { useEffect, useRef, useState } from "react";
@@ -12,7 +6,7 @@ import { Box } from "@mui/system";
 import { Button } from "@mui/material";
 import { LatLng } from "../types";
 import { mapStyles } from "../constants/mapStyles";
-import { calculateDistance, directionsRequest } from "../services/directions";
+import { calculateDistanceBySteps, directionsRequest } from "../services/directions";
 
 const markers = [
   {
@@ -43,15 +37,11 @@ interface PathMapProps {
   onChange?: (params: { points: LatLng[]; distance: number | null }) => void;
 }
 
-export const PathMap = ({
-  points: defaultPoints = [],
-  onChange,
-}: PathMapProps) => {
+export const PathMap = ({ points: defaultPoints = [], onChange }: PathMapProps) => {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAP_API_KEY,
   });
-  const [directionsResult, setDirectionsResult] =
-    useState<null | google.maps.DirectionsResult>(null);
+  const [directionsResult, setDirectionsResult] = useState<null | google.maps.DirectionsResult>(null);
   const directionsService = useRef<google.maps.DirectionsService | null>(null);
 
   const [clickedToAdd, setClickedToAdd] = useState(false);
@@ -74,14 +64,11 @@ export const PathMap = ({
 
   console.log(mapCenter);
 
-  const createDragHandler =
-    (pointIndex: number) => (e: google.maps.MapMouseEvent) => {
-      setPoints((prevPoints) =>
-        prevPoints.map((point, index) =>
-          pointIndex === index && e.latLng ? e.latLng.toJSON() : point
-        )
-      );
-    };
+  const createDragHandler = (pointIndex: number) => (e: google.maps.MapMouseEvent) => {
+    setPoints((prevPoints) =>
+      prevPoints.map((point, index) => (pointIndex === index && e.latLng ? e.latLng.toJSON() : point))
+    );
+  };
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     if (clickedToAdd) {
@@ -98,22 +85,18 @@ export const PathMap = ({
 
   useEffect(() => {
     if (window.google && isLoaded && points.length > 1) {
-      if (directionsService.current === null)
-        directionsService.current = new google.maps.DirectionsService();
+      if (directionsService.current === null) directionsService.current = new google.maps.DirectionsService();
 
-      directionsService.current.route(
-        directionsRequest(points),
-        (result, status) => {
-          if (status === google.maps.DirectionsStatus.OK && result !== null) {
-            setDirectionsResult(result);
-            if (typeof onChange === "function")
-              onChange({
-                points,
-                distance: calculateDistance(result),
-              });
-          }
+      directionsService.current.route(directionsRequest(points), (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK && result !== null) {
+          setDirectionsResult(result);
+          if (typeof onChange === "function")
+            onChange({
+              points,
+              distance: calculateDistanceBySteps(result.routes[0].legs),
+            });
         }
-      );
+      });
     }
   }, [isLoaded, points]);
 
@@ -135,11 +118,7 @@ export const PathMap = ({
         }}
       >
         {points.map((point, index) => (
-          <Marker
-            position={point}
-            draggable
-            onDragEnd={createDragHandler(index)}
-          />
+          <Marker position={point} draggable onDragEnd={createDragHandler(index)} />
         ))}
         {directionsResult && (
           <DirectionsRenderer

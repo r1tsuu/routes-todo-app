@@ -1,20 +1,12 @@
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 
-import {
-  Box,
-  Button,
-  CssBaseline,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-} from "@mui/material";
+import { Box, Button, CssBaseline, Typography, Dialog, DialogTitle, DialogContent } from "@mui/material";
 import { useMemo, useState } from "react";
 import { Layout } from "./components/Layout";
 import { Combobox } from "./components/Combobox";
 import { PathCard } from "./components/PathCard";
 import { Path } from "./components/Path";
-import { AddPath } from "./components/AddPath";
+import { CreatePath } from "./components/CreatePath";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { GOOGLE_MAP_API_KEY } from "./constants";
 
@@ -24,8 +16,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -34,8 +25,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -44,8 +34,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -54,8 +43,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -64,8 +52,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -74,8 +61,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -84,8 +70,7 @@ const paths = [
     title: "Path title",
     shortDescription:
       "Short lorem100Minim aute ullamco officia dolor reprehenderit ullamco ad quis occaecat excepteur consequat.",
-    description:
-      "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
+    description: "Eu esse mollit tempor non consequat ut anim esse aute commodo aute.",
     distance: "1.75 km",
     isFavorited: true,
   },
@@ -95,10 +80,7 @@ export const App = () => {
   const [activePathId, setActivePathId] = useState<null | number>(null);
   const [addPathDialogOpen, setAddPathDialogOpen] = useState(false);
 
-  const activePath = useMemo(
-    () => paths.find((route) => route.id === activePathId),
-    [activePathId]
-  );
+  const activePath = useMemo(() => paths.find((route) => route.id === activePathId), [activePathId]);
 
   const createPathCardClickHandler = (pathId: number) => () => {
     if (activePathId !== pathId) setActivePathId(pathId);
@@ -120,7 +102,7 @@ export const App = () => {
       >
         <DialogTitle>Add new path</DialogTitle>
         <DialogContent dividers>
-          <AddPath />
+          <CreatePath />
         </DialogContent>
       </Dialog>
       <Layout
@@ -151,21 +133,9 @@ export const App = () => {
         left={
           <>
             <Combobox options={paths} />
-            <Box
-              marginTop={2}
-              maxHeight={500}
-              overflow="auto"
-              display="flex"
-              flexDirection="column"
-              gap={1.5}
-            >
+            <Box marginTop={2} maxHeight={500} overflow="auto" display="flex" flexDirection="column" gap={1.5}>
               {paths.map(({ id, ...route }) => (
-                <PathCard
-                  isActive={id === activePathId}
-                  onClick={createPathCardClickHandler(id)}
-                  {...route}
-                  key={id}
-                />
+                <PathCard isActive={id === activePathId} onClick={createPathCardClickHandler(id)} {...route} key={id} />
               ))}
             </Box>
           </>
