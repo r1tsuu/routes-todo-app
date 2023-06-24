@@ -30,7 +30,15 @@ export const PathCard = ({
       borderRadius={2}
       onClick={onClick}
       gap={0.5}
-      sx={{ cursor: isActive ? "default" : "pointer" }}
+      sx={{
+        transition: "0.25s",
+        cursor: isActive ? "default" : "pointer",
+        ...(!isActive && {
+          "&:hover": {
+            bgcolor: "grey.300",
+          },
+        }),
+      }}
     >
       <Box width="70%" display="flex" gap={1} alignItems="center">
         <ZoomOutMapIcon
