@@ -1,7 +1,7 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { firestore } from "../app/firebase";
-import { IPath } from "../types";
+import { IPath, CreatePathParams } from "../types";
 
 import {
   updateDoc,
@@ -17,8 +17,6 @@ import {
 interface UpdatePathParams extends Partial<Omit<IPath, "id">> {
   id: string;
 }
-
-type CreatePathParams = Omit<IPath, "id" | "inFavorites">;
 
 const fetchPaths = async () => {
   const ref = collection(firestore, "paths");
