@@ -75,10 +75,10 @@ export const App = () => {
 
   const handleCreatePathSubmit = async (data: CreatePathParams) => {
     const res = await createPath(data);
-    createPathDialog.onClose();
-    alerts.openCreate();
 
     if ("data" in res && res.data) {
+      createPathDialog.onClose();
+      alerts.openCreate();
       setActivePathId(res.data);
     }
   };
