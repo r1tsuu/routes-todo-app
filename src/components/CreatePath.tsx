@@ -69,11 +69,7 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const {
-    isOpen: isPointsLengthAlertOpen,
-    onOpen: onPointsLengthAlertOpen,
-    onClose: onPointsLengthAlertClose,
-  } = useDisclosure();
+  const pointsLengthAlert = useDisclosure();
 
   const { control, handleSubmit } = useForm<CreatePathFormFields>({
     resolver: yupResolver(createPathFormSchema),
@@ -88,7 +84,7 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
         points,
         distance: distanceToString(distance),
       });
-    else onPointsLengthAlertOpen();
+    else pointsLengthAlert.onOpen();
   };
 
   const textFields = [
@@ -192,11 +188,11 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
       </Grid>
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        open={isPointsLengthAlertOpen}
+        open={pointsLengthAlert.isOpen}
         autoHideDuration={3000}
-        onClose={onPointsLengthAlertClose}
+        onClose={pointsLengthAlert.onClose}
       >
-        <Alert severity="warning" onClose={onPointsLengthAlertClose}>
+        <Alert severity="warning" onClose={pointsLengthAlert.onClose}>
           Create at least 2 points
         </Alert>
       </Snackbar>
