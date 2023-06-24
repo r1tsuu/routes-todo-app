@@ -10,11 +10,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Snackbar,
-  Alert,
   IconButton,
 } from "@mui/material";
 
+import { BottomAlert } from "./components/BottomAlert";
 import { Layout } from "./components/Layout";
 import { SearchField } from "./components/SearchField";
 import { PathCard } from "./components/PathCard";
@@ -168,20 +167,8 @@ export const App = () => {
           <CreatePath onSubmit={handleCreatePathSubmit} />
         </DialogContent>
       </Dialog>
-      {alerts.list.map(({ title, ...props }, index) => (
-        <Snackbar
-          key={index}
-          autoHideDuration={2500}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          {...props}
-        >
-          <Alert severity="success" {...props}>
-            {title}
-          </Alert>
-        </Snackbar>
+      {alerts.list.map((props, index) => (
+        <BottomAlert key={index} {...props} />
       ))}
     </>
   );

@@ -4,11 +4,9 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Controller, useForm } from "react-hook-form";
 
 import {
-  Alert,
   Box,
   Button,
   Grid,
-  Snackbar,
   TextField,
   Typography,
   useMediaQuery,
@@ -20,6 +18,7 @@ import { distanceToString } from "../services/directions";
 import { useDisclosure } from "../hooks/useDisclosure";
 
 import { CreatePathParams, LatLng } from "../types";
+import { BottomAlert } from "./BottomAlert";
 
 const Field = ({
   children,
@@ -186,16 +185,7 @@ export const CreatePath = ({ onSubmit }: CreatePathProps) => {
           />
         </Grid>
       </Grid>
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        open={pointsLengthAlert.isOpen}
-        autoHideDuration={3000}
-        onClose={pointsLengthAlert.onClose}
-      >
-        <Alert severity="warning" onClose={pointsLengthAlert.onClose}>
-          Create at least 2 points
-        </Alert>
-      </Snackbar>
+      <BottomAlert {...pointsLengthAlert} title="Create at least 2 points" />
     </>
   );
 };

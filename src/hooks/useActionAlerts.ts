@@ -6,8 +6,7 @@ export const useActionAlerts = () => {
   const deletePathAlert = useDisclosure();
 
   const item = (disclosure: DisclosureReturn, title: string) => ({
-    open: disclosure.isOpen,
-    onClose: disclosure.onClose,
+    ...disclosure,
     title,
   });
 
