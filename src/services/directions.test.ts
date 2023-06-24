@@ -99,7 +99,7 @@ test("createDirectionsRequest", () => {
   expect(createDirectionsRequest([origin, destination])).toMatchObject({
     origin,
     destination,
-    travelMode: google.maps.TravelMode.DRIVING,
+    travelMode: google.maps.TravelMode.WALKING,
   });
 
   const pointThrough_1 = getRandomLatLng();
@@ -110,7 +110,7 @@ test("createDirectionsRequest", () => {
   ).toMatchObject({
     origin,
     destination,
-    travelMode: google.maps.TravelMode.DRIVING,
+    travelMode: google.maps.TravelMode.WALKING,
     waypoints: [
       {
         location: pointThrough_1,
@@ -130,7 +130,7 @@ test("createDirectionsRequest", () => {
   ).toMatchObject({
     origin,
     destination,
-    travelMode: google.maps.TravelMode.DRIVING,
+    travelMode: google.maps.TravelMode.WALKING,
     waypoints: [
       {
         location: pointThrough_1,
@@ -158,7 +158,7 @@ test("distanceToString", () => {
   let distance = 999;
   expect(distanceToString(distance)).toBe("999 m");
   distance = 1000;
-  expect(distanceToString(distance)).toBe("1 km");
+  expect(distanceToString(distance)).toBe("1.00 km");
   distance = 1500;
-  expect(distanceToString(distance)).toBe("1.5 km");
+  expect(distanceToString(distance)).toBe("1.50 km");
 });

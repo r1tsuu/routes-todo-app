@@ -15,7 +15,7 @@ export const calculateDistanceBySteps = (
 
 export const createDirectionsRequest = (
   points: LatLng[],
-  travelMode: google.maps.TravelMode = google.maps.TravelMode.DRIVING
+  travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING
 ) => {
   if (points.length < 2)
     throw new Error(
