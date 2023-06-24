@@ -21,12 +21,7 @@ import { PathCard } from "./components/PathCard";
 import { Path } from "./components/Path";
 import { CreatePath } from "./components/CreatePath";
 
-import {
-  useCreatePathMutation,
-  useDeletePathMutation,
-  useFetchPathsQuery,
-  useUpdatePathMutation,
-} from "./services/pathsApi";
+import { usePathsApi } from "./services/pathsApi";
 
 import { useActionAlerts } from "./hooks/useActionAlerts";
 import { useDisclosure } from "./hooks/useDisclosure";
@@ -40,10 +35,7 @@ export const App = () => {
   const alerts = useActionAlerts();
   const createPathDialog = useDisclosure();
 
-  const { data: paths } = useFetchPathsQuery();
-  const [createPath] = useCreatePathMutation();
-  const [updatePath] = useUpdatePathMutation();
-  const [deletePath] = useDeletePathMutation();
+  const { paths, createPath, updatePath, deletePath } = usePathsApi();
 
   const filteredPaths = useMemo(
     () =>

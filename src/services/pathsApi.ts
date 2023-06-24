@@ -119,3 +119,12 @@ export const {
   useUpdatePathMutation,
   useDeletePathMutation,
 } = pathsApi;
+
+export const usePathsApi = () => {
+  const { data: paths } = useFetchPathsQuery();
+  const [createPath] = useCreatePathMutation();
+  const [updatePath] = useUpdatePathMutation();
+  const [deletePath] = useDeletePathMutation();
+
+  return { paths, createPath, updatePath, deletePath };
+};
